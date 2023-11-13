@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Гра "Клікер"</title>
+  <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Play:wght@700&display=swap');
+
+
+    body {
+        font-family: 'Play', sans-serif;
+    }
+    #game-container {
+      width: 500px;
+      height: 500px;
+      background-color: lightgray;
+      position: relative;
+    }
+    .ball {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: green;
+      position: absolute;
+      cursor: pointer;
+    }
+    #start-button, #cancel-button {
+      margin-top: 10px;
+    }
+    #instruction {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <!-- Balls will be dynamically created here -->
+  </div>
+  <p id="instruction">Натисни на кульки, щоби отримати очки!</p>
+  <p id="points">Кількість: 0</p>
+  <p id="timer">Залишилось часу: </p>
+  <label for="game-duration">Виберіть тривалість:</label>
+  <select id="game-duration">
+    <option value="10">10 секунд</option>
+    <option value="30">30 секунд</option>
+    <option value="60">60 секунд</option>
+  </select>
+  <button id="start-button">Почати</button>
+  <button id="cancel-button" disabled>Скасувати</button>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+  var gameContainer = document.getElementById("game-container");
+  var startButton = document.getElementById("start-button");
+  var cancelButton = document.getElementById("cancel-button");
+  var instruction = document.getElementById("instruction");
+  var pointsElement = document.getElementById("points");
+  var timerElement = document.getElementById("timer");
+  var gameDurationSelect = document.getElementById("game-duration");
+  var balls = [];
+  var gameStarted = false;
+  var timer;
+  var gameDuration;
+  var points = 0;
+
+  startButton.addEventListener("click", function() {
+    if (!gameStarted) {
+      instruction.style.display = "none";
+      gameStarted = true;
+      startButton.disabled = true;
+      cancelButton.disabled = false;
+      createBall();
+      gameDuration = parseInt(gameDurationSelect.value);
+      points = 0;
+      updatePoints();
+      updateTimer(gameDuration);
+      timer = setInterval(function() {
+        gameDuration--;
+        updateTimer(gameDuration);
+        if (gameDuration <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+  });
+
+  cancelButton.addEventListener("click", function() {
+    if (gameStarted) {
+      clearInterval(timer);
+      gameStarted = false;
+      startButton.disabled = false;
+      cancelButton.disabled = true;
+      instruction.style.display = "block";
+      balls.forEach(function(ball) {
+        gameContainer.removeChild(ball);
+      });
+      balls = [];
+      displayFinalPoints();
+    }
+  });
+
+  gameContainer.addEventListener("click", function(event) {
+    if (gameStarted) {
+      var ball = event.target;
+      if (ball.classList.contains("ball")) {
+        gameContainer.removeChild(ball);
+        balls.splice(balls.indexOf(ball), 1);
+        createBall();
+        points++;
+        updatePoints();
+      }
+    }
+  });
+
+  function createBall() {
+    var ball = document.createElement("div");
+    ball.classList.add("ball");
+    ball.style.left = getRandomPosition() + "px";
+    ball.style.top = getRandomPosition() + "px";
+    gameContainer.appendChild(ball);
+    balls.push(ball);
+  }
+
+  function getRandomPosition() {
+    var min = 50;
+    var max = 450;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function updatePoints() {
+    pointsElement.textContent = "Кількість: " + points;
+  }
+
+  function updateTimer(seconds) {
+    timerElement.textContent = "Залишилося часу: " + seconds + "s";
+  }
+
+  function endGame() {
+    gameStarted = false;
+    startButton.disabled = false;
+    cancelButton.disabled = true;
+    instruction.style.display = "block";
+    clearInterval(timer);
+    balls.forEach(function(ball) {
+      gameContainer.removeChild(ball);
+    });
+    balls = [];
+    displayFinalPoints();
+  }
+
+  function displayFinalPoints() {
+    var finalPointsElement = document.createElement("p");
+    finalPointsElement.textContent = "Результат: " + points;
+    document.body.appendChild(finalPointsElement);
+  }
+});
+
+
+  </script>
+</body>
+</html>
